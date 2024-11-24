@@ -109,6 +109,7 @@ struct xfrmnl_sa {
 	uint32_t                        seq;
 	uint32_t                        reqid;
 	uint16_t                        family;
+	uint32_t                        if_id;
 	uint8_t                         mode;        /* XFRM_MODE_xxx */
 	uint8_t                         replay_window;
 	uint8_t                         flags;
@@ -157,6 +158,7 @@ struct xfrmnl_sa {
 #define XFRM_SA_ATTR_REPLAY_STATE   0x2000000
 #define XFRM_SA_ATTR_EXPIRE         0x4000000
 #define XFRM_SA_ATTR_OFFLOAD_DEV    0x8000000
+#define XFRM_SA_ATTR_IF_ID          0x10000000
 
 static struct nl_cache_ops  xfrmnl_sa_ops;
 static struct nl_object_ops xfrm_sa_obj_ops;
@@ -325,6 +327,7 @@ static uint64_t xfrm_sa_compare(struct nl_object *_a, struct nl_object *_b,
 		      xfrmnl_ltime_cfg_cmp(a->lft, b->lft));
 	diff |= _DIFF(XFRM_SA_ATTR_REQID, a->reqid != b->reqid);
 	diff |= _DIFF(XFRM_SA_ATTR_FAMILY, a->family != b->family);
+	diff |= _DIFF(XFRM_SA_ATTR_IF_ID, a->if_id != b->if_id);
 	diff |= _DIFF(XFRM_SA_ATTR_MODE, a->mode != b->mode);
 	diff |= _DIFF(XFRM_SA_ATTR_REPLAY_WIN,
 		      a->replay_window != b->replay_window);
@@ -439,6 +442,7 @@ static const struct trans_tbl sa_attrs[] = {
 	__ADD(XFRM_SA_ATTR_REPLAY_STATE, replay_state),
 	__ADD(XFRM_SA_ATTR_EXPIRE, expire),
 	__ADD(XFRM_SA_ATTR_OFFLOAD_DEV, user_offload),
+	__ADD(XFRM_SA_ATTR_IF_ID, if_id),
 };
 
 static char* xfrm_sa_attrs2str(int attrs, char *buf, size_t len)
@@ -1006,6 +1010,11 @@ int xfrmnl_sa_parse(struct nlmsghdr *n, struct xfrmnl_sa **result)
 		sa->ce_mask |= XFRM_SA_ATTR_OFFLOAD_DEV;
 	}
 
+	if (tb[XFRMA_IF_ID]) {
+		sa->if_id      =   *(uint32_t*)nla_data(tb[XFRMA_IF_ID]);
+		sa->ce_mask |= XFRM_SA_ATTR_IF_ID;
+	}
+
 	*result = _nl_steal_pointer(&sa);
 	return 0;
 }
@@ -1365,6 +1374,10 @@ static int build_xfrm_sa_message(struct xfrmnl_sa *tmpl, int cmd, int flags, str
 		offload->flags = tmpl->user_offload->flags;
 	}
 
+	if (tmpl->ce_mask & XFRM_SA_ATTR_IF_ID) {
+		NLA_PUT_U32 (msg, XFRMA_IF_ID, tmpl->if_id);
+	}
+
 	*result = msg;
 	return 0;
 
@@ -1696,6 +1709,22 @@ int xfrmnl_sa_set_family (struct xfrmnl_sa* sa, unsigned int family)
 {
 	sa->family = family;
 	sa->ce_mask |= XFRM_SA_ATTR_FAMILY;
+
+	return 0;
+}
+
+int xfrmnl_sa_get_if_id (struct xfrmnl_sa* sa)
+{
+	if (sa->ce_mask & XFRM_SA_ATTR_IF_ID)
+		return sa->if_id;
+	else
+		return -1;
+}
+
+int xfrmnl_sa_set_if_id (struct xfrmnl_sa* sa, unsigned int if_id)
+{
+	sa->if_id = if_id;
+	sa->ce_mask |= XFRM_SA_ATTR_IF_ID;
 
 	return 0;
 }

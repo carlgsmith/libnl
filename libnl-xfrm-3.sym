@@ -82,6 +82,7 @@ global:
 	xfrmnl_sa_get_encap_tmpl;
 	xfrmnl_sa_get_family;
 	xfrmnl_sa_get_flags;
+	xfrmnl_sa_get_if_id;
 	xfrmnl_sa_get_kernel;
 	xfrmnl_sa_get_lifetime_cfg;
 	xfrmnl_sa_get_mark;
@@ -114,6 +115,7 @@ global:
 	xfrmnl_sa_set_encap_tmpl;
 	xfrmnl_sa_set_family;
 	xfrmnl_sa_set_flags;
+	xfrmnl_sa_set_if_id;
 	xfrmnl_sa_set_lifetime_cfg;
 	xfrmnl_sa_set_mark;
 	xfrmnl_sa_set_mode;

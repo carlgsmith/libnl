@@ -100,6 +100,9 @@ extern int                      xfrmnl_sa_set_reqid (struct xfrmnl_sa*, unsigned
 extern int                      xfrmnl_sa_get_family (struct xfrmnl_sa*);
 extern int                      xfrmnl_sa_set_family (struct xfrmnl_sa*, unsigned int);
 
+extern int                      xfrmnl_sa_get_if_id (struct xfrmnl_sa*);
+extern int                      xfrmnl_sa_set_if_id (struct xfrmnl_sa*, unsigned int);
+
 extern int                      xfrmnl_sa_get_mode (struct xfrmnl_sa*);
 extern int                      xfrmnl_sa_set_mode (struct xfrmnl_sa*, unsigned int);
 
